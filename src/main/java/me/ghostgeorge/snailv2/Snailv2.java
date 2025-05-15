@@ -22,13 +22,9 @@ import java.util.Map;
 public final class Snailv2 extends JavaPlugin{
     /*
     --TO DO LIST--
-    - Make snails follow players, teleport when they get too far
-    - Add a method for spawning snails
-    - Add start stop reset commands to be able to play the game
     - Command autofill from tutorials
-    - Stop armadillos from curling up
+    - Snail pathfinding AI
     - Snails go across dimensions
-    - Custom snail pathfinding AI
     - Review plugin
      */
 
@@ -64,7 +60,7 @@ public final class Snailv2 extends JavaPlugin{
         }, 0L, 20L); // Run every second
     }
 
-    private void resetGame(CommandSender sender) {
+    public void resetGame(CommandSender sender) {
         stopSnails();
         for (Player player : Bukkit.getOnlinePlayers()) {
             player.setGameMode(GameMode.SURVIVAL);
@@ -78,7 +74,7 @@ public final class Snailv2 extends JavaPlugin{
     }
 
     // Stops immortal snails
-    private void stopSnails() {
+    public void stopSnails() {
         snailActive = false;
         for (Entity snail : playerSnailMap.values()) {
             if (snail != null && !snail.isDead()) {
@@ -111,7 +107,7 @@ public final class Snailv2 extends JavaPlugin{
     }
 
     // Resets effects and gamemode
-    private void resetPlayerEffectsAndMode() {
+    public void resetPlayerEffectsAndMode() {
         for (Player player : Bukkit.getOnlinePlayers()) {
             // Remove regen and saturation
             player.removePotionEffect(PotionEffectType.REGENERATION);
@@ -125,46 +121,58 @@ public final class Snailv2 extends JavaPlugin{
         }
     }
     // Removes area restriction
-    private void removeAreaRestriction(Player player) {
+    public void removeAreaRestriction(Player player) {
         player.removeMetadata("restrictedArea", this);
     }
 
-    private void startFollowingSnail(Entity snail, Player player) {
-        Bukkit.getScheduler().runTaskTimer(this, () -> {
-            if (snail == null || snail.isDead() || !player.isOnline()) return;
+    public void spawnSnailsForPlayers() {
+        // Sets active variable to true
+        snailActive = true;
 
-            Location snailLoc = snail.getLocation();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            // Spawn location 15 blocks behind the player
+            Location spawnLocation = player.getLocation().clone()
+                    .add(player.getLocation().getDirection().normalize().multiply(-15));
+            spawnLocation.setY(spawnLocation.getWorld().getHighestBlockYAt(spawnLocation) + 1); // Ensure it's above ground
+
+            // actually spawn the armadillo
+            Armadillo snail = (Armadillo) player.getWorld().spawnEntity(spawnLocation, spawnMobType);
+
+            // modify it
+            snail.setCustomName(player.getName());
+            snail.setCustomNameVisible(true);
+            snail.setGlowing(true);
+            snail.setMetadata("snail", new FixedMetadataValue(this, true));
+
+            // remember the pairing
+            playerSnailMap.put(player, snail);
+
+            // attach follow AI
+            startFollowingSnail(snail, player); // Pathfinding
+
+            // Tells player the snail has been summoned
+            player.sendMessage(ChatColor.GREEN + "Your Immortal Snail has been summoned.");
+        }
+
+    }
+
+    public void startFollowingSnail(Entity snail, Player player) {
+        Bukkit.getScheduler().runTaskTimer(this, () -> {
+            if (!snail.isValid() || !player.isOnline()) return;
+
             Location playerLoc = player.getLocation();
+            Location snailLoc = snail.getLocation();
 
             double distance = snailLoc.distance(playerLoc);
 
-            // ✅ If too far, teleport closer (~20 blocks away)
-            if (distance > 50) {
-                Location teleportLoc = playerLoc.clone().add(20, 0, 0);
-                teleportLoc.setY(player.getWorld().getHighestBlockYAt(teleportLoc) + 1); // Ensure it's above ground
+            if (distance > 30) {
+                Location teleportLoc = playerLoc.clone().add(-3, 0, -3);
                 snail.teleport(teleportLoc);
-                return;
+            } else if (distance > 5) {
+                Vector direction = playerLoc.toVector().subtract(snailLoc.toVector()).normalize().multiply(0.25);
+                snail.setVelocity(direction);
             }
 
-            // ✅ Otherwise, move toward the player gradually
-            if (distance > 2) { // Only move if a bit away (not standing on top)
-                Vector direction = playerLoc.toVector().subtract(snailLoc.toVector()).normalize().multiply(0.5); // Slow follow
-                Location newLoc = snailLoc.clone().add(direction);
-
-                // Optional: face the player
-                newLoc.setDirection(playerLoc.toVector().subtract(snailLoc.toVector()));
-
-                // Apply the move
-                snail.teleport(newLoc);
-            }
-
-            // ✅ Optional: prevent curling if Armadillo (Paper only)
-            if (snail instanceof Armadillo armadillo) {
-                // Prevent snail from curling here
-            }
-
-        }, 0L, 5L); // Run every 5 ticks (~0.25s)
+        }, 0L, 10L); // Every 0.5s
     }
-
-
 }

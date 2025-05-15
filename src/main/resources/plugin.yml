@@ -5,8 +5,8 @@ api-version: '1.21'
 commands:
   snail:
     description: Controls the immortal snails
-    usage: /<command> <start\stop|reset>
+    usage: /<command> <start|reset>
 permissions:
   snailv2.admin:
-    description: Allows access to the snail start/stop commands
+    description: Allows access to the snail start/reset commands
     default: op

@@ -1,93 +1,53 @@
 package me.ghostgeorge.snailv2.commands;
-import org.bukkit.event.Listener;
+import me.ghostgeorge.snailv2.Snailv2;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
-public class snailcommands implements Listener {
+public class snailcommands implements CommandExecutor {
+    private final Snailv2 plugin;
 
-    // Unimplemented commands
+    public snailcommands(Snailv2 plugin) {
+        this.plugin = plugin;
+    }
 
-    /*
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        // If snail command is run
         if (command.getName().equalsIgnoreCase("snail")) {
+            // Checks for permissions to run command
             if (sender instanceof Player && !sender.hasPermission("immortalsnail.admin")) {
                 sender.sendMessage("You do not have permission to run this command.");
                 return false;
             }
-
+            // If user has permissions
             if (args.length == 1) {
+                // If command arg was start
                 if (args[0].equalsIgnoreCase("start")) {
-                    // Spawn snails for each player and activate them
-                    resetPlayerEffectsAndMode();
+                    // Takes away starting effects
+                    plugin.resetPlayerEffectsAndMode();
+                    // Removes area restriction for all players
                     for (Player player : Bukkit.getOnlinePlayers()) {
-                        removeAreaRestriction(player);
+                        plugin.removeAreaRestriction(player);
                     }
-                    spawnSnailsForPlayers();
+                    // Spawns a snail for each player
+                    plugin.spawnSnailsForPlayers();
                     // Inform players the snails are starting
                     sender.sendMessage(ChatColor.GREEN + "The Immortal Snails have been unleashed!");
                     return true;
                 }
-                if (args[0].equalsIgnoreCase("stop")) {
-                    // Stop snails from moving and dealing damage
-                    stopSnails();
-                    sender.sendMessage(ChatColor.RED + "The Immortal Snails have been stopped.");
-                    return true;
-                }
+                // If command arg was reset
                 if (args[0].equalsIgnoreCase("reset")) {
-                    resetGame(sender);
+                    // Executes reset game method
+                    plugin.resetGame(sender);
                     sender.sendMessage(ChatColor.YELLOW + "Game has been reset. All players returned to start.");
                     return true;
                 }
             }
         }
         return false;
-     }
-     */
-
-
-
-    /*
-    private void spawnSnailsForPlayers() {
-        snailActive = true;
-        for (Player player : Bukkit.getOnlinePlayers()) {
-            // Spawn snail 15 blocks away from the player
-            Location spawnLocation = player.getLocation().add(player.getLocation().getDirection().normalize().multiply(15));
-
-            // Make sure the location is not obstructed
-            if (!spawnLocation.getBlock().isPassable()) {
-                spawnLocation = player.getLocation().add(player.getLocation().getDirection().normalize().multiply(20)); // Adjust spawn point if obstructed
-            }
-
-            // Ensure the chunk is loaded before spawning
-            spawnLocation.getChunk().load();
-
-            // Log the spawn location for debugging
-            getLogger().info("✅ Successfully prepared spawn location at " + spawnLocation);
-            player.sendMessage(ChatColor.GREEN + "Snail spawn location: " + spawnLocation.getBlockX() + ", " + spawnLocation.getBlockY() + ", " + spawnLocation.getBlockZ());
-
-            // Spawn the mob based on the configured type
-            try {
-                Entity snail = (Entity) player.getWorld().spawnEntity(spawnLocation, spawnMobType);
-                snail.setMetadata("spawnedByPlugin", new FixedMetadataValue(this, true)); // Mark as plugin-spawned
-                snail.setCustomName("Immortal Snail");
-                snail.setCustomNameVisible(true);  // Ensure custom name is visible
-                snail.setGlowing(true);  // Make the snail glow (for visibility)
-
-                // Log successful spawn
-                getLogger().info("✅ Spawned Immortal Snail for " + player.getName() + " at " + spawnLocation);
-                player.sendMessage(ChatColor.GREEN + "Snail spawned at: " + spawnLocation.getBlockX() + ", " + spawnLocation.getBlockY() + ", " + spawnLocation.getBlockZ());
-                snail.teleport(spawnLocation.add(0, 1, 0)); // Adjust the height a little to ensure it's not stuck in blocks
-
-            } catch (Exception e) {
-                // If an error occurs, log it
-                getLogger().severe("❌ Failed to spawn snail for " + player.getName() + ": " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
     }
-     */
-
-
-
-
-
 }
