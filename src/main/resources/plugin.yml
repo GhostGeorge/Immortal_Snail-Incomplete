@@ -1,0 +1,12 @@
+name: snailv2
+version: '1.0'
+main: me.ghostgeorge.snailv2.Snailv2
+api-version: '1.21'
+commands:
+  snail:
+    description: Controls the immortal snails
+    usage: /<command> <start\stop|reset>
+permissions:
+  snailv2.admin:
+    description: Allows access to the snail start/stop commands
+    default: op

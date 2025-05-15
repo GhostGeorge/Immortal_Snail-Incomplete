@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="snailv2:jar">
+    <output-path>$USER_HOME$/Desktop/Paper server/plugins</output-path>
+    <root id="archive" name="snailv2.jar">
+      <element id="module-output" name="snailv2" />
+    </root>
+  </artifact>
+</component>
