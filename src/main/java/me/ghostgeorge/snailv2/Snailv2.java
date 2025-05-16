@@ -23,10 +23,11 @@ import java.util.Map;
 public final class Snailv2 extends JavaPlugin{
     /*
     --TO DO LIST--
-    - Implement custom model -
-    - Stop them teleporting so close to me
+    - Implement custom model, use downloaded bb model
+    - Correct all logic to work for custom model
+    - Stop snails teleporting so close to me
     - Doesnt come close once they are ~2 blocks away
-    - Snail pathfinding AI
+    - Snail pathfinding AI - to player
      */
 
     // Changing the entity the snail is. Primarily for debugging armadillo spawns
