@@ -39,10 +39,10 @@ public class eventlisteners implements Listener {
     // Stops the snail mob type from spawning
     @EventHandler
     public void onCreatureSpawn(CreatureSpawnEvent event) {
-        // Cancel natural snail mob spawns
         if (event.getEntityType() == plugin.spawnMobType &&
-                event.getSpawnReason() == CreatureSpawnEvent.SpawnReason.NATURAL) {
+                event.getSpawnReason() != CreatureSpawnEvent.SpawnReason.CUSTOM) {
             event.setCancelled(true);
+            plugin.getLogger().info("Cancelled non-plugin spawn of " + event.getEntityType());
         }
     }
 
@@ -109,6 +109,6 @@ public class eventlisteners implements Listener {
             plugin.startFollowingSnail(newSnail, player);
 
             player.sendMessage(ChatColor.GREEN + "Your Immortal Snail followed you through dimensions!");
-        }, 40L); // 40 ticks = 2 seconds
+        }, 160L); // 160 ticks = 8 seconds
     }
 }

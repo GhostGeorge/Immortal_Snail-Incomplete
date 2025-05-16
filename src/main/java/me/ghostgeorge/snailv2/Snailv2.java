@@ -23,7 +23,9 @@ import java.util.Map;
 public final class Snailv2 extends JavaPlugin{
     /*
     --TO DO LIST--
-    - Stop armadillos curling up - spigot help
+    - Implement custom model -
+    - Stop them teleporting so close to me
+    - Doesnt come close once they are ~2 blocks away
     - Snail pathfinding AI
      */
 
