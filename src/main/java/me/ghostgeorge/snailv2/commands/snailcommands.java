@@ -5,9 +5,16 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.bukkit.util.StringUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public class snailcommands implements CommandExecutor {
+import java.util.ArrayList;
+import java.util.List;
+
+public class snailcommands implements CommandExecutor, TabExecutor {
     private final Snailv2 plugin;
 
     public snailcommands(Snailv2 plugin) {
@@ -49,5 +56,19 @@ public class snailcommands implements CommandExecutor {
             }
         }
         return false;
+    }
+
+    @Override
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender,
+                                                @NotNull Command command,
+                                                @NotNull String label,
+                                                @NotNull String[] args) {
+        final List<String> validArguments = new ArrayList<>();
+        if (args.length == 1) {
+            // /snail <start | reset>
+            StringUtil.copyPartialMatches(args[0], List.of("start", "reset"), validArguments);
+            return validArguments;
+        }
+        return List.of();
     }
 }

@@ -1,6 +1,10 @@
 package me.ghostgeorge.snailv2.listeners;
 
 import me.ghostgeorge.snailv2.Snailv2;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.entity.Armadillo;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -9,7 +13,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.metadata.FixedMetadataValue;
 
 public class eventlisteners implements Listener {
     private final Snailv2 plugin;
@@ -67,5 +73,42 @@ public class eventlisteners implements Listener {
                 }
             }
         }
+    }
+
+    // Allows snails to travel across dimensions
+    @EventHandler
+    public void onWorldChange(PlayerChangedWorldEvent event) {
+        Player player = event.getPlayer();
+        if (!plugin.snailActive) return;
+
+        // Remove the old snail (if it exists)
+        Entity oldSnail = plugin.getPlayerSnailMap().get(player);
+        if (oldSnail != null && !oldSnail.isDead()) {
+            oldSnail.remove();
+        }
+
+        plugin.getPlayerSnailMap().remove(player);
+
+        // Delay the new snail spawn by 2 seconds (40 ticks)
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            // Make sure player is still online
+            if (!player.isOnline()) return;
+
+            // Get a safe spawn location
+            Location newSpawnLoc = player.getLocation().clone().add(player.getLocation().getDirection().normalize().multiply(-15));
+            newSpawnLoc.setY(player.getWorld().getHighestBlockYAt(newSpawnLoc) + 1);
+
+            // Spawn new snail
+            Entity newSnail = player.getWorld().spawnEntity(newSpawnLoc, plugin.spawnMobType);
+            newSnail.setCustomName(player.getName());
+            newSnail.setCustomNameVisible(true);
+            newSnail.setGlowing(true);
+            newSnail.setMetadata("snail", new FixedMetadataValue(plugin, true));
+
+            plugin.getPlayerSnailMap().put(player, (Armadillo) newSnail); // Update Armadillo to the snail mob type
+            plugin.startFollowingSnail(newSnail, player);
+
+            player.sendMessage(ChatColor.GREEN + "Your Immortal Snail followed you through dimensions!");
+        }, 40L); // 40 ticks = 2 seconds
     }
 }

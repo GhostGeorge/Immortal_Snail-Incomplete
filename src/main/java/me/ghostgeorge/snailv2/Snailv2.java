@@ -1,5 +1,6 @@
 package me.ghostgeorge.snailv2;
 
+import me.ghostgeorge.snailv2.commands.snailcommands;
 import me.ghostgeorge.snailv2.listeners.eventlisteners;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -22,10 +23,8 @@ import java.util.Map;
 public final class Snailv2 extends JavaPlugin{
     /*
     --TO DO LIST--
-    - Command autofill from tutorials
+    - Stop armadillos curling up - spigot help
     - Snail pathfinding AI
-    - Snails go across dimensions
-    - Review plugin
      */
 
     // Changing the entity the snail is. Primarily for debugging armadillo spawns
@@ -34,12 +33,19 @@ public final class Snailv2 extends JavaPlugin{
     public boolean snailActive = false;
     // No clue what this does
     private final Map<Player, Armadillo> playerSnailMap = new HashMap<>(); // <-- CHANGE ARMADILLO WHEN SPAWNMOBTYPE CHANGES
+    // Returns snail map to event listeners
+    public Map<Player, Armadillo> getPlayerSnailMap() {
+        return playerSnailMap;
+    }
 
     @Override
     public void onEnable() {
         // Plugin startup logic
         setupGame();
         getServer().getPluginManager().registerEvents(new eventlisteners(this), this);
+        snailcommands commandExecutor = new snailcommands(this);
+        this.getCommand("snail").setExecutor(commandExecutor);
+        this.getCommand("snail").setTabCompleter(commandExecutor);
         getLogger().info("Snail Enabled");
     }
 
@@ -171,6 +177,12 @@ public final class Snailv2 extends JavaPlugin{
             } else if (distance > 5) {
                 Vector direction = playerLoc.toVector().subtract(snailLoc.toVector()).normalize().multiply(0.25);
                 snail.setVelocity(direction);
+            }
+
+            // Prevent curling if the mob is an Armadillo
+            if (snail instanceof Armadillo armadillo) {
+                // Get help from paper docs
+                armadillo.setAggressive(true);
             }
 
         }, 0L, 10L); // Every 0.5s
